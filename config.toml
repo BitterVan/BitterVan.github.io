@@ -12,7 +12,8 @@ theme = "even"
 [markdown]
 # Whether to do syntax highlighting
 # Theme can be customised by setting the `highlight_theme` variable to a theme supported by Zola
-highlight_code = false
+highlight_code = true
+highlight_theme = "visual-studio-dark"
 
 [extra]
 # Put all your custom variables here
