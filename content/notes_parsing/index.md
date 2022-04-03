@@ -1,5 +1,5 @@
 +++
-title = "Parsing Takeaway"
+title = "Parsing Takeaways"
 date = 2022-04-03
 [taxonomies]
 tags = ["Compilers", "Parsing"]
