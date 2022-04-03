@@ -1,9 +1,12 @@
----
-title: Parsing Takeaway
-date: 2022-04-03 00:21:42
-tags:
----
-# Parsing
++++
+title = "Parsing Takeaway"
+date = 2022-04-03
+[taxonomies]
+tags = ["Compilers", "Parsing"]
+categories = ["Course"]
++++
+
+Just some quicknotes.
 
 ## LL(1)
 
@@ -12,12 +15,15 @@ This method comprises two actions:
 - Generate, for a generative rule $A\rightarrow\alpha$, the nonterminal at the top of the stack can be replaced by $\alpha$.
 - Match, remove the token at the top, if it is the same as the next input token.
 
+<!-- more -->
+
 ### Parsing table $M[N, T]$
 
 Here M for moves.
 
 - If $A\rightarrow \alpha$ is a production rule, and there is a derivation $\alpha \Rightarrow^*a\beta$, where $a$ is a token, then add $A\rightarrow \alpha$ to $M[A, a]$.
-- If $A\rightarrow \alpha$ is a production rule, and there is a derivation $\alpha \Rightarrow^*\epsilon$, and $S\$\Rightarrow^*\beta Aa \gamma$, where $a$ is a token, then add $A\rightarrow \alpha$ to $M[A, a]$. (Making $A$ disappear directly).
+- If $A\rightarrow \alpha$ is a production rule, and there is a derivation $\alpha \Rightarrow^\ast\epsilon$, and $S\Rightarrow^\ast\beta Aa \gamma$
+ where $a$ is a token, then add $A\rightarrow \alpha$ to $M[A, a]$. (Making $A$ disappear directly).
 
 ### Left Factoring
 
@@ -36,9 +42,9 @@ If  there is no **cycle** and no $\epsilon$-production, then the non-terminals s
 **Item** is yielded by production. For example, $A\rightarrow XYZ$, yields 
 
 $$
-A\rightarrow .XYZ\\
-A\rightarrow X.YZ\\
-A\rightarrow XY.Z\\
+A\rightarrow .XYZ \\\\
+A\rightarrow X.YZ \\\\
+A\rightarrow XY.Z \\\\
 A\rightarrow XYZ.
 $$
 
