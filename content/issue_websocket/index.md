@@ -26,11 +26,12 @@ WebREPL connection from: ('192.168.137.1', 2935)
 
 ```
 
+<!-- more -->
 At first I thought it was just like the old problems, parameters, policies, etc. So I applied WireShark to check the different between the packets sent by webrepl and the Typescript extension written by myself.
 
 Using the `ws` package to connect:
 
-![Packet Using `ws`](@/websocket/js_pack.png)
+![Packet Using `ws`](./ws_pack.png)
 
 Using Javascript `WebSocket` to conncet to the board:
 
