@@ -1,8 +1,10 @@
----
-title: WebSocket Problem with Proxy
-date: 2022-03-21 10:25:16
-tags: Issue
----
++++
+title = "WebSocket Problem with Proxy"
+date = 2022-03-21
+[taxonomies]
+tags = ["Issue", "Network"]
+categories = ["Courses"]
++++
 <!-- 
 # WebSocket on ESP32 Fails, 'Not a websocket request'
 
