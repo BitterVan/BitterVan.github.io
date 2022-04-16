@@ -189,26 +189,26 @@ def setup_conn(port, accept_handler):
 
 ```c
 STATIC mp_obj_t socket_setsockopt(size_t n_args, const mp_obj_t *args) {
-				...
-			#if MICROPY_PY_USOCKET_EVENTS
-		// level: SOL_SOCKET
-		// special "register callback" option
-		case 20: {
-			if (args[3] == mp_const_none) {
-				if (self->events_callback != MP_OBJ_NULL) {
-					usocket_events_remove(self);
-					self->events_callback = MP_OBJ_NULL;
-				}
-			} else {
-				if (self->events_callback == MP_OBJ_NULL) {
-					usocket_events_add(self);
-				}
-				self->events_callback = args[3];
+	...
+	#if MICROPY_PY_USOCKET_EVENTS
+	// level: SOL_SOCKET
+	// special "register callback" option
+	case 20: {
+		if (args[3] == mp_const_none) {
+			if (self->events_callback != MP_OBJ_NULL) {
+				usocket_events_remove(self);
+				self->events_callback = MP_OBJ_NULL;
 			}
-			break;
+		} else {
+			if (self->events_callback == MP_OBJ_NULL) {
+				usocket_events_add(self);
+			}
+			self->events_callback = args[3];
 		}
-			#endif
-				...
+		break;
+	}
+	#endif
+	...
 	return mp_const_none;
 }
 ```
@@ -265,14 +265,14 @@ void usocket_events_handler(void) {
 
 ```c
 #define MICROPY_EVENT_POLL_HOOK \
-	do { \
-		extern void mp_handle_pending(bool); \
-		mp_handle_pending(true); \
-		MICROPY_PY_USOCKET_EVENTS_HANDLER \
-		MP_THREAD_GIL_EXIT(); \
-		ulTaskNotifyTake(pdFALSE, 1); \
-		MP_THREAD_GIL_ENTER(); \
-	} while (0);
+do { \
+	extern void mp_handle_pending(bool); \
+	mp_handle_pending(true); \
+	MICROPY_PY_USOCKET_EVENTS_HANDLER \
+	MP_THREAD_GIL_EXIT(); \
+	ulTaskNotifyTake(pdFALSE, 1); \
+	MP_THREAD_GIL_ENTER(); \
+} while (0);
 ```
 
 ![Untitled](%E4%B8%AD%E6%9C%9F%E6%8A%A5%E5%91%8A%20b1e3c/Untitled%207.png)
