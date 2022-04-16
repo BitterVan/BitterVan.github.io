@@ -6,7 +6,42 @@ tags = ["Compilers", "Parsing"]
 categories = ["Courses"]
 +++
 
-Just some quicknotes.
+## CFG
+
+A CFG is a 4-tuple $(V, \Sigma, S,\rightarrow)$
+
+* $V$ is set of nonterminals
+* $\Sigma$ is set of terminals
+* $S\in V$ is the start symbol
+* $\rightarrow\subset V\times (V\cup \Sigma)^*$ is relation, called the products
+
+**Derivation** is a sequence of replacement from left handside to **RHS** of grammar rules.
+
+**Notation** $\Rightarrow^*$ means any steps of derivation.
+
+<!-- more -->
+
+### Ambiguity Removal
+
+**Nonassociative** requires no more than one operators in a expression, making a expression fully parenthesized.
+
+**Precedence** 
+
+$$
+exp\rightarrow exp\,addop\,exp | term\\\\
+addop\rightarrow +|-\\\\
+term \rightarrow term\,mulop\,term|factor\\\\
+mulop\rightarrow *\\\\
+factor\rightarrow (exp) | number
+$$
+
+**Associativity** left-recursive makes left-associative, right-recuisive makes right-associative.
+
+**Dangling else** this requires if a statement have else, then both the two statement inside the statement to have else statement. And for both of matched and unmatched statement, the statement between if and else must be matched.
+
+**Inessential Ambiguity** the associated semantices do not depend on disambiguating rule used.
+
+In **EBNF**, {} stands for repetition and [] is for optionality.
 
 ## LL(1)
 
@@ -14,8 +49,6 @@ This method comprises two actions:
 
 - Generate, for a generative rule $A\rightarrow\alpha$, the nonterminal at the top of the stack can be replaced by $\alpha$.
 - Match, remove the token at the top, if it is the same as the next input token.
-
-<!-- more -->
 
 ### Parsing table $M[N, T]$
 
