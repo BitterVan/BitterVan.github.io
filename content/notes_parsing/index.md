@@ -50,6 +50,16 @@ This method comprises two actions:
 - Generate, for a generative rule $A\rightarrow\alpha$, the nonterminal at the top of the stack can be replaced by $\alpha$.
 - Match, remove the token at the top, if it is the same as the next input token.
 
+### First & Follow
+
+* ${\rm First}(X)$ is the terminals that X can start with. And if $X\rightarrow \epsilon$, then $\epsilon\in {\rm First}(X)$.
+
+* ${\rm Follow}(X)$ is only for non-terminals, it can be calculated in these steps:
+
+  1. adding $\$$ to ${\rm Follow}(S)$.
+  2. if $A\rightarrow \alpha B \beta$, adding ${\rm First}(\beta) - \epsilon$ to ${\rm Follow}(B)$
+  3. if $A\rightarrow \alpha B$ or $A\rightarrow \alpha B\beta, \epsilon \in {\rm First}(\beta)$, then add ${\rm Follow}(A)$ to ${\rm Follow}(B)$.
+
 ### Parsing table $M[N, T]$
 
 Here M for moves.
