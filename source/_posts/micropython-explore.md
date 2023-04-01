@@ -12,15 +12,14 @@ tags: Embedded System
 
 - 在 esp32 上执行如下代码
     
-```c
-import webrepl
-webrepl.start()
-while True:
-    print("loop")
-```
-    
-后，使用 webrepl 客户端进行连接，无法在板上 serial port 和 webrepl console 中看到任何相关内容
-    
+	```c
+	import webrepl
+	webrepl.start()
+	while True:
+		print("loop")
+	```
+    后，使用 webrepl 客户端进行连接，无法在板上 serial port 和 webrepl console 中看到任何相关内容
+		
 - 在执行完 `webrepl.start()` 后，没有开始循环时，使用 webrepl 客户端进行连接，连接成功后，再开始循环，`loop` 会输出到 serial port 和 webrepl console 中
 - 如果执行的是这样的代码
     
