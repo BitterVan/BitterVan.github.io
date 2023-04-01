@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>How Can MicroPython Run Like A OS? | BitterVan&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  
+  
+  
+  <meta name="description" content="在本文中记录我们以 MicroPython 和 REPL 的交互为例，探索 MicroPython 为什么能和一个 OS 一样做到被事件驱动，而非顺序执行。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="How Can MicroPython Run Like A OS?">
+<meta property="og:url" content="http://bittervan.github.io/2022/04/16/micropython-explore/index.html">
+<meta property="og:site_name" content="BitterVan&#39;s Blog">
+<meta property="og:description" content="在本文中记录我们以 MicroPython 和 REPL 的交互为例，探索 MicroPython 为什么能和一个 OS 一样做到被事件驱动，而非顺序执行。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://bittervan.github.io/2022/04/16/micropython-explore/Untitled4.png">
+<meta property="og:image" content="http://bittervan.github.io/2022/04/16/micropython-explore/Untitled5.png">
+<meta property="og:image" content="http://bittervan.github.io/2022/04/16/micropython-explore/Untitled6.png">
+<meta property="og:image" content="http://bittervan.github.io/2022/04/16/micropython-explore/Untitled7.png">
+<meta property="article:published_time" content="2022-04-16T09:48:10.000Z">
+<meta property="article:modified_time" content="2023-04-01T02:59:33.013Z">
+<meta property="article:author" content="Xingkai Wang">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://bittervan.github.io/2022/04/16/micropython-explore/Untitled4.png">
+  
+    <link rel="alternate" href="/atom.xml" title="BitterVan&#39;s Blog" type="application/atom+xml">
+  
+  <link rel="icon" href="/css/images/favicon.ico">
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans|Montserrat:700" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,300italic,400italic" rel="stylesheet" type="text/css">
+  <link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+  <style type="text/css">
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/9749f0/00000000000000000001008f/27/l?subset_id=2&fvd=n5) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/90cf9f/000000000000000000010091/27/l?subset_id=2&fvd=n7) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/8a5494/000000000000000000013365/27/l?subset_id=2&fvd=n4) format("woff2");font-weight:lighter;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/d337d8/000000000000000000010095/27/l?subset_id=2&fvd=i4) format("woff2");font-weight:400;font-style:italic;}</style>
+    
+  <link rel="stylesheet" id="athemes-headings-fonts-css" href="//fonts.googleapis.com/css?family=Yanone+Kaffeesatz%3A200%2C300%2C400%2C700&amp;ver=4.6.1" type="text/css" media="all">
+
+  <link rel="stylesheet" id="athemes-headings-fonts-css" href="//fonts.googleapis.com/css?family=Oswald%3A300%2C400%2C700&amp;ver=4.6.1" type="text/css" media="all">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+
+  
+<script src="/js/jquery-3.1.1.min.js"></script>
+
+
+  <!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="/css/bootstrap.css" >
+  <link rel="stylesheet" href="/css/fashion.css" >
+  <link rel="stylesheet" href="/css/glyphs.css" >
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+
+  <body data-spy="scroll" data-target="#toc" data-offset="50">
+
+
+  
+
+
+<header id="allheader" class="site-header" role="banner" 
+   >
+  <div class="clearfix container">
+      <div class="site-branding">
+
+          <h1 class="site-title">
+            
+              <a href="/" title="BitterVan&#39;s Blog" rel="home"> BitterVan&#39;s Blog </a>
+            
+          </h1>
+          
+          
+            
+          <nav id="main-navigation" class="main-navigation" role="navigation">
+            <a class="nav-open">Menu</a>
+            <a class="nav-close">Close</a>
+
+            <div class="clearfix sf-menu">
+              <ul id="main-nav" class="menu sf-js-enabled sf-arrows"  style="touch-action: pan-y;">
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663" linktext="/"> <a class="" href="/">Home</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663" linktext="archives"> <a class="" href="/archives">Archives</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663" linktext="categories"> <a class="" href="/categories">Categories</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663" linktext="tags"> <a class="" href="/tags">Tags</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663" linktext="about"> <a class="" href="/about">About</a> </li>
+                    
+              </ul>
+            </div>
+          </nav>
+
+      </div>
+  </div>
+</header>
+
+
+  <div id="container">
+    <div id="wrap">
+            
+      <div id="content" class="outer">
+        
+          <section id="main" style="float:none;"><article id="post-micropython-explore" style="width: 66%; float:left;" class="article article-type-post" itemscope itemprop="blogPost" >
+  <div id="articleInner" class="clearfix post-1016 post type-post status-publish format-standard has-post-thumbnail hentry category-template-2 category-uncategorized tag-codex tag-edge-case tag-featured-image tag-image tag-template">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="thumb" class="article-title" itemprop="name">
+      How Can MicroPython Run Like A OS?
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-meta">
+      
+	<a href="/2022/04/16/micropython-explore/" class="article-date">
+	  <time datetime="2022-04-16T09:48:10.000Z" itemprop="datePublished">April 16, 2022</time>
+	</a>
+
+       
+      
+	<span id="busuanzi_container_page_pv">
+	  本文总阅读量<span id="busuanzi_value_page_pv"></span>次
+	</span>
+
+    </div>
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>在本文中记录我们以 MicroPython 和 REPL 的交互为例，探索 MicroPython 为什么能和一个 OS 一样做到被事件驱动，而非顺序执行。</p>
+<span id="more"></span>
+
+<h2 id="现象"><a href="#现象" class="headerlink" title="现象"></a>现象</h2><ul>
+<li>在 esp32 上执行如下代码</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">import webrepl</span><br><span class="line">webrepl.start()</span><br><span class="line"><span class="keyword">while</span> True:</span><br><span class="line">    print(<span class="string">&quot;loop&quot;</span>)</span><br></pre></td></tr></table></figure>
+<p>后，使用 webrepl 客户端进行连接，无法在板上 serial port 和 webrepl console 中看到任何相关内容</p>
+<ul>
+<li><p>在执行完 <code>webrepl.start()</code> 后，没有开始循环时，使用 webrepl 客户端进行连接，连接成功后，再开始循环，<code>loop</code> 会输出到 serial port 和 webrepl console 中</p>
+</li>
+<li><p>如果执行的是这样的代码</p>
+  <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">import webrepl</span><br><span class="line">import time</span><br><span class="line">webrepl.start()</span><br><span class="line"><span class="keyword">while</span> True:</span><br><span class="line">    print(<span class="string">&quot;loop&quot;</span>)</span><br><span class="line">    time.sleep_ms(<span class="number">1000</span>)</span><br></pre></td></tr></table></figure>
+<p>  则即使在循环开始以后，也能够通过 webrepl 连接上</p>
+</li>
+<li><p>在循环开始后，使用 serial 连接的终端模拟器可以直接通过 <code>Ctrl + C</code> 而 webrepl console 中就无法做到</p>
+</li>
+<li><p>在加入了 <code>time.sleep_ms(1000)</code> 的代码被加入后，在 webrepl 中也能够使用 <code>Ctrl + C</code> 来将循环打断</p>
+</li>
+</ul>
+<h2 id="一些前期猜想"><a href="#一些前期猜想" class="headerlink" title="一些前期猜想"></a>一些前期猜想</h2><ul>
+<li>MicroPython 是直接跑在 MicroPython 上的，通过中断进行一切事件驱动（无法解释死循环中无法响应 webrepl 请求）</li>
+<li>MicroPython 是跑在 RTOS 上的，通过 RTOS 的线程级调度来实现并发，这样也能够做到事件驱动（还是无法解释死循环中无法响应 webrepl 请求）</li>
+<li>MicroPython 是个单线程程序，直接由自身通过轮询去处理所有的事件（这样的确可以在要输出的时候去查看所有连接上的 console，但是能输出不能接收又显得太过古怪，至少在输出的时候可以通过查看所有事件来发现要接收的信号）</li>
+</ul>
+<p>到这里我们已经觉得把 MicroPython 当成黑箱去分析得出的结果可能非常不靠谱，所以我们从源码入手，尝试解释我们实验中遇到的现象。</p>
+<h2 id="实际实现"><a href="#实际实现" class="headerlink" title="实际实现"></a>实际实现</h2><p>我们烧录进去的二进制文件包括了 RTOS 和 MicroPython，它们一共使用三种方式来实现事件驱动：</p>
+<h3 id="Baremetal-进行中断响应"><a href="#Baremetal-进行中断响应" class="headerlink" title="Baremetal 进行中断响应"></a>Baremetal 进行中断响应</h3><p>通过设置片上中断来进行中断响应，达到打断程序的目的。这样可以非常自由地进行操作，例如收到了 uart 的输入后，可以直接将这些输入送给 MicroPython 的 stream。这里的响应是最底层的。在这一层，MCU 和我们使用的计算机十分相似，我们完全可以用理解 PC 中断的方式来理解 esp32 的中断。</p>
+<p>在 MicroPython 最先开始在 FreeRTOS 上运行的时候，进行了一些初始化操作，其中进行了中断设置。我们发现</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">app_main</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    <span class="comment">// Hook for a board to run code at start up.</span></span><br><span class="line">    <span class="comment">// This defaults to initialising NVS.</span></span><br><span class="line">    MICROPY_BOARD_STARTUP();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Create and transfer control to the MicroPython task.</span></span><br><span class="line">    xTaskCreatePinnedToCore(mp_task, <span class="string">&quot;mp_task&quot;</span>, MP_TASK_STACK_SIZE / <span class="keyword">sizeof</span>(StackType_t), <span class="literal">NULL</span>, MP_TASK_PRIORITY, &amp;mp_main_task_handle, MP_TASK_COREID);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>函数启动了主线程函数 <code>mp_task</code>，在其开始运行的时候</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">mp_task</span><span class="params">(<span class="type">void</span> *pvParameter)</span> &#123;</span><br><span class="line">    <span class="keyword">volatile</span> <span class="type">uint32_t</span> sp = (<span class="type">uint32_t</span>)get_sp();</span><br><span class="line">    <span class="meta">#<span class="keyword">if</span> MICROPY_PY_THREAD</span></span><br><span class="line">    mp_thread_init(pxTaskGetStackStart(<span class="literal">NULL</span>), MP_TASK_STACK_SIZE / <span class="keyword">sizeof</span>(<span class="type">uintptr_t</span>));</span><br><span class="line">    <span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">    <span class="meta">#<span class="keyword">if</span> CONFIG_USB_ENABLED</span></span><br><span class="line">    usb_init();</span><br><span class="line">    <span class="meta">#<span class="keyword">elif</span> CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG</span></span><br><span class="line">    usb_serial_jtag_init();</span><br><span class="line">    <span class="meta">#<span class="keyword">else</span></span></span><br><span class="line">    uart_stdout_init();</span><br><span class="line">    <span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">    machine_init();</span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
+
+<p>进行了这些初始化操作，而通过串口输出的 <code>loop</code> 会因为 <code>Ctrl + C</code> 而停止，键盘输入没有因为死循环而被禁用，就是因为这里调用 <code>uart_stdout_init</code> 进行了初始化</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">uart_stdout_init</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">	<span class="type">uart_config_t</span> uartcfg = &#123;</span><br><span class="line">		.baud_rate = MICROPY_HW_UART_REPL_BAUD,</span><br><span class="line">		.data_bits = UART_DATA_8_BITS,</span><br><span class="line">		.parity = UART_PARITY_DISABLE,</span><br><span class="line">		.stop_bits = UART_STOP_BITS_1,</span><br><span class="line">		.flow_ctrl = UART_HW_FLOWCTRL_DISABLE,</span><br><span class="line">		.rx_flow_ctrl_thresh = <span class="number">0</span></span><br><span class="line">	&#125;;</span><br><span class="line">	uart_param_config(MICROPY_HW_UART_REPL, &amp;uartcfg);</span><br><span class="line"></span><br><span class="line">	<span class="type">const</span> <span class="type">uint32_t</span> rxbuf = <span class="number">129</span>; <span class="comment">// IDF requires &gt; 128 min</span></span><br><span class="line">	<span class="type">const</span> <span class="type">uint32_t</span> txbuf = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">	uart_driver_install(MICROPY_HW_UART_REPL, rxbuf, txbuf, <span class="number">0</span>, <span class="literal">NULL</span>, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">	<span class="type">uart_isr_handle_t</span> handle;</span><br><span class="line">	uart_isr_free(MICROPY_HW_UART_REPL);</span><br><span class="line">	uart_isr_register(MICROPY_HW_UART_REPL, uart_irq_handler, <span class="literal">NULL</span>, ESP_INTR_FLAG_LOWMED | ESP_INTR_FLAG_IRAM, &amp;handle);</span><br><span class="line">	uart_enable_rx_intr(MICROPY_HW_UART_REPL);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>而这其中的函数 <code>uart_driver_install</code> 是一个 <code>esp-idf</code> 库函数，我们可以在官方文档中找到它的功能</p>
+<p><img src="/2022/04/16/micropython-explore/Untitled4.png" alt="官方文档中的函数声明"></p>
+<p><img src="/2022/04/16/micropython-explore/Untitled5.png" alt="官方文档中对函数功能的描述"></p>
+<p>这个函数将对应的中断响应程序 install 到内存的某个部分来等待中断。</p>
+<h3 id="RTOS-进行线程级调度"><a href="#RTOS-进行线程级调度" class="headerlink" title="RTOS 进行线程级调度"></a>RTOS 进行线程级调度</h3><p>此外，MicroPython 本身并不是一个单线程的程序，它也会通过 FreeROTS 的线程来执行自己的函数。比如在上面提到的，在一个没有 delay 的循环中，输出的内容仍然会被送到 webrepl 客户端，这是通过在 FreeRTOS 上 spawn 出来的线程来发送的。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">STATIC <span class="type">mp_obj_t</span> <span class="title function_">ppp_connect_py</span><span class="params">(<span class="type">size_t</span> n_args, <span class="type">const</span> <span class="type">mp_obj_t</span> *args, <span class="type">mp_map_t</span> *kw_args)</span> &#123;</span><br><span class="line">	<span class="class"><span class="keyword">enum</span> &#123;</span> ARG_authmode, ARG_username, ARG_password &#125;;</span><br><span class="line">		...</span><br><span class="line">	<span class="keyword">if</span> (xTaskCreatePinnedToCore(pppos_client_task, <span class="string">&quot;ppp&quot;</span>, <span class="number">2048</span>, self, <span class="number">1</span>, (TaskHandle_t *)&amp;self-&gt;client_task_handle, MP_TASK_COREID) != pdPASS) &#123;</span><br><span class="line">		mp_raise_msg(&amp;mp_type_RuntimeError, MP_ERROR_TEXT(<span class="string">&quot;failed to create worker task&quot;</span>));</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> mp_const_none;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在这里 spawn 出了一个线程，执行的是 <code>pppos_client_task</code> ，这个 task</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">pppos_client_task</span><span class="params">(<span class="type">void</span> *self_in)</span> &#123;</span><br><span class="line">	<span class="type">ppp_if_obj_t</span> *self = (<span class="type">ppp_if_obj_t</span> *)self_in;</span><br><span class="line">	<span class="type">uint8_t</span> buf[<span class="number">256</span>];</span><br><span class="line"></span><br><span class="line">	<span class="keyword">while</span> (ulTaskNotifyTake(pdTRUE, <span class="number">0</span>) == <span class="number">0</span>) &#123;</span><br><span class="line">		<span class="type">int</span> err;</span><br><span class="line">		<span class="type">int</span> len = mp_stream_rw(self-&gt;stream, buf, <span class="keyword">sizeof</span>(buf), &amp;err, <span class="number">0</span>);</span><br><span class="line">		<span class="keyword">if</span> (len &gt; <span class="number">0</span>) &#123;</span><br><span class="line">			pppos_input_tcpip(self-&gt;pcb, (<span class="type">u8_t</span> *)buf, len);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	self-&gt;client_task_handle = <span class="literal">NULL</span>;</span><br><span class="line">	vTaskDelete(<span class="literal">NULL</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>的功能就是不断从 MicroPython 的 I&#x2F;O stream 中取东西，交由 PPP 来进行处理。由于是另一个线程，会被 FreeRTOS 调度出来，也就不会被 MicroPython 主线程上的循环给 block 住了。</p>
+<h3 id="MicroPython-进行事件响应"><a href="#MicroPython-进行事件响应" class="headerlink" title="MicroPython 进行事件响应"></a>MicroPython 进行事件响应</h3><p>那么为什么对 webrepl server 的连接请求又会被 block 呢？MicroPython 内部还有一套原生的 Event 系统，这些 events 会在特定的时候被放到 MicroPython 的 foreground 来运行。还是以 webrepl 为例，等待 webrepl client 的连接请求显然是被放到了 background 中的，而无法在没有 sleep 的循环中直接被响应又告诉我们这并不在另一个线程上运行，也并非中断。</p>
+<p>MicroPython 本身维护了一个链表，记录着那些需要被处理的回调函数</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">setup_conn</span>(<span class="params">port, accept_handler</span>):</span><br><span class="line">	<span class="keyword">global</span> listen_s</span><br><span class="line">	listen_s = socket.socket()</span><br><span class="line">	listen_s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">	ai = socket.getaddrinfo(<span class="string">&quot;0.0.0.0&quot;</span>, port)</span><br><span class="line">	addr = ai[<span class="number">0</span>][<span class="number">4</span>]</span><br><span class="line"></span><br><span class="line">	listen_s.bind(addr)</span><br><span class="line">	listen_s.listen(<span class="number">1</span>)</span><br><span class="line">	<span class="keyword">if</span> accept_handler:</span><br><span class="line">		listen_s.setsockopt(socket.SOL_SOCKET, <span class="number">20</span>, accept_handler)</span><br><span class="line">	<span class="keyword">for</span> i <span class="keyword">in</span> (network.AP_IF, network.STA_IF):</span><br><span class="line">		iface = network.WLAN(i)</span><br><span class="line">		<span class="keyword">if</span> iface.active():</span><br><span class="line">			<span class="built_in">print</span>(<span class="string">&quot;WebREPL daemon started on ws://%s:%d&quot;</span> % (iface.ifconfig()[<span class="number">0</span>], port))</span><br><span class="line">	<span class="keyword">return</span> listen_s</span><br></pre></td></tr></table></figure>
+
+<p>这段 Python 代码调用了一个用 C 语言编写的函数</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">STATIC <span class="type">mp_obj_t</span> <span class="title function_">socket_setsockopt</span><span class="params">(<span class="type">size_t</span> n_args, <span class="type">const</span> <span class="type">mp_obj_t</span> *args)</span> &#123;</span><br><span class="line">	...</span><br><span class="line">	<span class="meta">#<span class="keyword">if</span> MICROPY_PY_USOCKET_EVENTS</span></span><br><span class="line">	<span class="comment">// level: SOL_SOCKET</span></span><br><span class="line">	<span class="comment">// special &quot;register callback&quot; option</span></span><br><span class="line">	<span class="keyword">case</span> <span class="number">20</span>: &#123;</span><br><span class="line">		<span class="keyword">if</span> (args[<span class="number">3</span>] == mp_const_none) &#123;</span><br><span class="line">			<span class="keyword">if</span> (self-&gt;events_callback != MP_OBJ_NULL) &#123;</span><br><span class="line">				usocket_events_remove(self);</span><br><span class="line">				self-&gt;events_callback = MP_OBJ_NULL;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			<span class="keyword">if</span> (self-&gt;events_callback == MP_OBJ_NULL) &#123;</span><br><span class="line">				usocket_events_add(self);</span><br><span class="line">			&#125;</span><br><span class="line">			self-&gt;events_callback = args[<span class="number">3</span>];</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">	...</span><br><span class="line">	<span class="keyword">return</span> mp_const_none;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里将自己这个 socket 对象添加到 events 链表中，调用的是函数 <code>usocket_events_add</code>.</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">STATIC <span class="type">void</span> <span class="title function_">usocket_events_add</span><span class="params">(<span class="type">socket_obj_t</span> *sock)</span> &#123;</span><br><span class="line">	sock-&gt;events_next = usocket_events_head;</span><br><span class="line">	usocket_events_head = sock;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>将事件添加到链表头。而处理这些回调函数（事件）的，是在主线程中主动调用的函数，使用了类似轮询的方式，不断查看有没有需要处理的事件。比如处理 <code>usocket</code> 事件的</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">usocket_events_handler</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">	<span class="keyword">if</span> (usocket_events_head == <span class="literal">NULL</span>) &#123;</span><br><span class="line">		<span class="keyword">return</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> (--usocket_events_divisor) &#123;</span><br><span class="line">		<span class="keyword">return</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	usocket_events_divisor = USOCKET_EVENTS_DIVISOR;</span><br><span class="line"></span><br><span class="line">	fd_set rfds;</span><br><span class="line">	FD_ZERO(&amp;rfds);</span><br><span class="line">	<span class="type">int</span> max_fd = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> (<span class="type">socket_obj_t</span> *s = usocket_events_head; s != <span class="literal">NULL</span>; s = s-&gt;events_next) &#123;</span><br><span class="line">		FD_SET(s-&gt;fd, &amp;rfds);</span><br><span class="line">		max_fd = MAX(max_fd, s-&gt;fd);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Poll the sockets</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">timeval</span> <span class="title">timeout</span> =</span> &#123; .tv_sec = <span class="number">0</span>, .tv_usec = <span class="number">0</span> &#125;;</span><br><span class="line">	<span class="type">int</span> r = select(max_fd + <span class="number">1</span>, &amp;rfds, <span class="literal">NULL</span>, <span class="literal">NULL</span>, &amp;timeout);</span><br><span class="line">	<span class="keyword">if</span> (r &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">		<span class="keyword">return</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Call the callbacks</span></span><br><span class="line">	<span class="keyword">for</span> (<span class="type">socket_obj_t</span> *s = usocket_events_head; s != <span class="literal">NULL</span>; s = s-&gt;events_next) &#123;</span><br><span class="line">		<span class="keyword">if</span> (FD_ISSET(s-&gt;fd, &amp;rfds)) &#123;</span><br><span class="line">			mp_call_function_1_protected(s-&gt;events_callback, s);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>就在每次被调用到的时候取处理我们添加到链表中的 events. 而在很多函数中，我们都能够找到这个函数以宏的形式得到了调用</p>
+<p><img src="/2022/04/16/micropython-explore/Untitled6.png" alt="对改 Handler 的使用"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> MICROPY_EVENT_POLL_HOOK \</span></span><br><span class="line"><span class="meta">do &#123; \</span></span><br><span class="line"><span class="meta">	extern void mp_handle_pending(bool); \</span></span><br><span class="line"><span class="meta">	mp_handle_pending(true); \</span></span><br><span class="line"><span class="meta">	MICROPY_PY_USOCKET_EVENTS_HANDLER \</span></span><br><span class="line"><span class="meta">	MP_THREAD_GIL_EXIT(); \</span></span><br><span class="line"><span class="meta">	ulTaskNotifyTake(pdFALSE, 1); \</span></span><br><span class="line"><span class="meta">	MP_THREAD_GIL_ENTER(); \</span></span><br><span class="line"><span class="meta">&#125; while (0);</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/04/16/micropython-explore/Untitled7.png" alt="添加该函数 Hook 的位置"></p>
+<p>在这些地方，都会检查是否有还未被处理的 event，然后直接由主线程进行处理。较为典型的，有在 repl 获取命令时的 <code>mp_task() --&gt; pyexec_friendly_repo() --&gt; readline() --&gt; mp_hal_stdin_rx_chr()</code> 中，就使用了这个宏</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">mp_hal_stdin_rx_chr</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">	<span class="keyword">for</span> (;;) &#123;</span><br><span class="line">		<span class="type">int</span> c = ringbuf_get(&amp;stdin_ringbuf);</span><br><span class="line">		<span class="keyword">if</span> (c != <span class="number">-1</span>) &#123;</span><br><span class="line">			<span class="keyword">return</span> c;</span><br><span class="line">		&#125;</span><br><span class="line">		MICROPY_EVENT_POLL_HOOK</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们在来看 <code>time.sleep_ms</code> 的实现</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">STATIC <span class="type">mp_obj_t</span> <span class="title function_">time_sleep_ms</span><span class="params">(<span class="type">mp_obj_t</span> arg)</span> &#123;</span><br><span class="line">	<span class="type">mp_int_t</span> ms = mp_obj_get_int(arg);</span><br><span class="line">	<span class="keyword">if</span> (ms &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">		mp_hal_delay_ms(ms);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> mp_const_none;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>而这里调用的 <code>mp_hal_delay_ms</code> 中，又有查询 socket 中事件的宏</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">mp_hal_delay_ms</span><span class="params">(<span class="type">uint32_t</span> ms)</span> &#123;</span><br><span class="line">	<span class="type">uint64_t</span> us = ms * <span class="number">1000</span>;</span><br><span class="line">	<span class="type">uint64_t</span> dt;</span><br><span class="line">	<span class="type">uint64_t</span> t0 = esp_timer_get_time();</span><br><span class="line">	<span class="keyword">for</span> (;;) &#123;</span><br><span class="line">		mp_handle_pending(<span class="literal">true</span>);</span><br><span class="line">		MICROPY_PY_USOCKET_EVENTS_HANDLER</span><br><span class="line">		<span class="title function_">MP_THREAD_GIL_EXIT</span><span class="params">()</span>;</span><br><span class="line">		<span class="type">uint64_t</span> t1 = esp_timer_get_time();</span><br><span class="line">		dt = t1 - t0;</span><br><span class="line">		<span class="keyword">if</span> (dt + portTICK_PERIOD_MS * <span class="number">1000</span> &gt;= us) &#123;</span><br><span class="line">			<span class="comment">// doing a vTaskDelay would take us beyond requested delay time</span></span><br><span class="line">			taskYIELD();</span><br><span class="line">			MP_THREAD_GIL_ENTER();</span><br><span class="line">			t1 = esp_timer_get_time();</span><br><span class="line">			dt = t1 - t0;</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			ulTaskNotifyTake(pdFALSE, <span class="number">1</span>);</span><br><span class="line">			MP_THREAD_GIL_ENTER();</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> (dt &lt; us) &#123;</span><br><span class="line">		<span class="comment">// do the remaining delay accurately</span></span><br><span class="line">		mp_hal_delay_us(us - dt);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>所以我们在进行 <code>time.sleep_ms</code> 的时候，也能够响应 socket 的事件。</p>
+<p>综上，MicroPython 用三种不同的机制来实现了类似事件驱动的效果。感觉这样做似乎并不太 elegant，但可能出于性能考虑选取的最优解，三种方式的开销也确实一种比一种小。本次阅读 MicroPython 源码使我们获益良多。（虽然他们把 initializer 拼成 initialiser）</p>
+<h2 id="boot-py-main-py-的运行"><a href="#boot-py-main-py-的运行" class="headerlink" title="boot.py, main.py 的运行"></a>boot.py, main.py 的运行</h2><p>运行这两个文件的代码也在 <code>mp_task</code> 中</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">mp_task</span><span class="params">(<span class="type">void</span> *pvParameter)</span> &#123;</span><br><span class="line">		...</span><br><span class="line">    <span class="comment">// run boot-up scripts</span></span><br><span class="line">    pyexec_frozen_module(<span class="string">&quot;_boot.py&quot;</span>);</span><br><span class="line">    pyexec_file_if_exists(<span class="string">&quot;boot.py&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span> (pyexec_mode_kind == PYEXEC_MODE_FRIENDLY_REPL) &#123;</span><br><span class="line">        <span class="type">int</span> ret = pyexec_file_if_exists(<span class="string">&quot;main.py&quot;</span>);</span><br><span class="line">        <span class="keyword">if</span> (ret &amp; PYEXEC_FORCED_EXIT) &#123;</span><br><span class="line">            <span class="keyword">goto</span> soft_reset_exit;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">		...</span><br><span class="line">    <span class="keyword">goto</span> soft_reset;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>最后这个文件中读出来的内容都去调了这个函数</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">pyexec_file</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *filename)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> parse_compile_execute(filename, MP_PARSE_FILE_INPUT, EXEC_FLAG_SOURCE_IS_FILENAME);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>和 REPL 中我们的输入共用一个函数，只是改变了一个参数，这个参数仅带来 parse 的不同</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">mp_parse_tree_t</span> <span class="title function_">mp_parse</span><span class="params">(<span class="type">mp_lexer_t</span> *lex, <span class="type">mp_parse_input_kind_t</span> input_kind)</span> &#123;</span><br><span class="line">		...</span><br><span class="line">    <span class="comment">// work out the top-level rule to use, and push it on the stack</span></span><br><span class="line">    <span class="type">size_t</span> top_level_rule;</span><br><span class="line">    <span class="keyword">switch</span> (input_kind) &#123;</span><br><span class="line">        <span class="keyword">case</span> MP_PARSE_SINGLE_INPUT:</span><br><span class="line">            top_level_rule = RULE_single_input;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> MP_PARSE_EVAL_INPUT:</span><br><span class="line">            top_level_rule = RULE_eval_input;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            top_level_rule = RULE_file_input;</span><br><span class="line">    &#125;</span><br><span class="line">    push_rule(&amp;parser, lex-&gt;tok_line, top_level_rule, <span class="number">0</span>);</span><br><span class="line">		...</span><br></pre></td></tr></table></figure>
+
+<p>运行这两个文件的方式不过是读出来然后直接解释执行。</p>
+
+      
+    </div>
+    <footer class="entry-meta entry-footer">
+      
+      
+      
+        
+	<div id="comment">
+		<!-- 来必力City版安装代码 -->
+		<div id="lv-container" data-id="city" data-uid="MTAyMC8yOTQ4MS82MDQ5">
+		<script type="text/javascript">
+		   (function(d, s) {
+		       var j, e = d.getElementsByTagName(s)[0];
+
+		       if (typeof LivereTower === 'function') { return; }
+
+		       j = d.createElement(s);
+		       j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+		       j.async = true;
+
+		       e.parentNode.insertBefore(j, e);
+		   })(document, 'script');
+		</script>
+		<noscript>为正常使用来必力评论功能请激活JavaScript</noscript>
+		</div>
+		<!-- City版安装代码已完成 -->
+	</div>
+
+
+
+      
+    </footer>
+    <hr class="entry-footer-hr">
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2022/03/31/webrepl-fail-on-proxy/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">WebSocket Cannot Be Established Due to Proxy</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+<!-- Table of Contents -->
+
+  <aside id="sidebar">
+    <div id="toc" class="toc-article">
+    <strong class="toc-title">Contents</strong>
+    
+      <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8E%B0%E8%B1%A1"><span class="nav-number">1.</span> <span class="nav-text">现象</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E4%BA%9B%E5%89%8D%E6%9C%9F%E7%8C%9C%E6%83%B3"><span class="nav-number">2.</span> <span class="nav-text">一些前期猜想</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E9%99%85%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.</span> <span class="nav-text">实际实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Baremetal-%E8%BF%9B%E8%A1%8C%E4%B8%AD%E6%96%AD%E5%93%8D%E5%BA%94"><span class="nav-number">3.1.</span> <span class="nav-text">Baremetal 进行中断响应</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RTOS-%E8%BF%9B%E8%A1%8C%E7%BA%BF%E7%A8%8B%E7%BA%A7%E8%B0%83%E5%BA%A6"><span class="nav-number">3.2.</span> <span class="nav-text">RTOS 进行线程级调度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MicroPython-%E8%BF%9B%E8%A1%8C%E4%BA%8B%E4%BB%B6%E5%93%8D%E5%BA%94"><span class="nav-number">3.3.</span> <span class="nav-text">MicroPython 进行事件响应</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#boot-py-main-py-%E7%9A%84%E8%BF%90%E8%A1%8C"><span class="nav-number">4.</span> <span class="nav-text">boot.py, main.py 的运行</span></a></li></ol>
+    
+    </div>
+  </aside>
+</section>
+        
+      </div>
+
+    </div>
+    <!-- <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+    <a href="/categories" class="mobile-nav-link">Categories</a>
+  
+    <a href="/tags" class="mobile-nav-link">Tags</a>
+  
+    <a href="/about" class="mobile-nav-link">About</a>
+  
+</nav> -->
+    <footer id="footer" class="site-footer">
+  
+
+  <div class="clearfix container">
+      <div class="site-info">
+	      &copy; 2023 BitterVan&#39;s Blog All Rights Reserved.
+        
+            <span id="busuanzi_container_site_uv">
+              本站访客数<span id="busuanzi_value_site_uv"></span>人次  
+              本站总访问量<span id="busuanzi_value_site_pv"></span>次
+            </span>
+          
+      </div>
+      <div class="site-credit">
+        Theme by <a href="https://github.com/iTimeTraveler/hexo-theme-hipaper" target="_blank">hipaper</a>
+      </div>
+  </div>
+</footer>
+
+
+<!-- min height -->
+
+<script>
+    var wrapdiv = document.getElementById("wrap");
+    var contentdiv = document.getElementById("content");
+
+    wrapdiv.style.minHeight = document.body.offsetHeight - document.getElementById("allheader").offsetHeight - document.getElementById("footer").offsetHeight + "px";
+    contentdiv.style.minHeight = document.body.offsetHeight - document.getElementById("allheader").offsetHeight - document.getElementById("footer").offsetHeight + "px";
+
+
+    <!-- headerblur min height -->
+    
+    
+</script>
+    
+<div style="display: none;">
+  <script src="https://s11.cnzz.com/z_stat.php?id=1260716016&web_id=1260716016" language="JavaScript"></script>
+</div>
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+  
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+<script src="/js/bootstrap.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+
+
+
+
+
+  <div style="display: none;">
+    <script src="https://s95.cnzz.com/z_stat.php?id=1260716016&web_id=1260716016" language="JavaScript"></script>
+  </div>
+
+
+
+	<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+	</script>
+
+
+
+
+
+
+  </div>
+
+  <a id="rocket" href="#top" class=""></a>
+  <script type="text/javascript" src="/js/totop.js" async=""></script>
+</body>
+</html>
