@@ -1,7 +1,7 @@
 ---
 title: "How Can MicroPython Run Like A OS?"
 date: 2022-04-16 09:48:10
-tags:
+tags: Embedded System
 ---
 
 在本文中记录我们以 MicroPython 和 REPL 的交互为例，探索 MicroPython 为什么能和一个 OS 一样做到被事件驱动，而非顺序执行。
