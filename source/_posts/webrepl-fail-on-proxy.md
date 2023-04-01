@@ -1,7 +1,7 @@
 ---
 title: WebSocket Cannot Be Established Due to Proxy
 date: 2022-03-31 10:20:15
-tags:
+tags: Embedded System
 ---
 
 I've been working on building a visual studio code extension for a better-developing experience on ESP32, MicroPython. But without any basic knowledge of front-end development, this process is quite tough for me.
