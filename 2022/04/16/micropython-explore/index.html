@@ -32,7 +32,7 @@
 <meta property="og:image" content="http://bittervan.github.io/2022/04/16/micropython-explore/Untitled6.png">
 <meta property="og:image" content="http://bittervan.github.io/2022/04/16/micropython-explore/Untitled7.png">
 <meta property="article:published_time" content="2022-04-16T09:48:10.000Z">
-<meta property="article:modified_time" content="2023-04-01T06:59:27.272Z">
+<meta property="article:modified_time" content="2023-04-01T07:05:35.790Z">
 <meta property="article:author" content="Xingkai Wang">
 <meta property="article:tag" content="Embedded System">
 <meta name="twitter:card" content="summary">
@@ -186,7 +186,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2023-04-01 06:59:27" itemprop="dateModified" datetime="2023-04-01T06:59:27+00:00">2023-04-01</time>
+                <time title="Modified: 2023-04-01 07:05:35" itemprop="dateModified" datetime="2023-04-01T07:05:35+00:00">2023-04-01</time>
               </span>
 
           
@@ -204,11 +204,10 @@
 <span id="more"></span>
 
 <h2 id="现象"><a href="#现象" class="headerlink" title="现象"></a>现象</h2><ul>
-<li>在 esp32 上执行如下代码</li>
-</ul>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">import webrepl</span><br><span class="line">webrepl.start()</span><br><span class="line"><span class="keyword">while</span> True:</span><br><span class="line">    print(<span class="string">&quot;loop&quot;</span>)</span><br></pre></td></tr></table></figure>
-<p>后，使用 webrepl 客户端进行连接，无法在板上 serial port 和 webrepl console 中看到任何相关内容</p>
-<ul>
+<li><p>在 esp32 上执行如下代码</p>
+  <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">import webrepl</span><br><span class="line">webrepl.start()</span><br><span class="line"><span class="keyword">while</span> True:</span><br><span class="line">	print(<span class="string">&quot;loop&quot;</span>)</span><br></pre></td></tr></table></figure>
+<p>  后，使用 webrepl 客户端进行连接，无法在板上 serial port 和 webrepl console 中看到任何相关内容</p>
+</li>
 <li><p>在执行完 <code>webrepl.start()</code> 后，没有开始循环时，使用 webrepl 客户端进行连接，连接成功后，再开始循环，<code>loop</code> 会输出到 serial port 和 webrepl console 中</p>
 </li>
 <li><p>如果执行的是这样的代码</p>
