@@ -20,3 +20,6 @@
     <span style="float: right;">Ziyue Pan, Wenbo Shen, <b>Xingkai Wang</b>, Yutian Yang, Rui Chang, Yao Liu, Chengwei Liu, Yang Liu, Kui Ren</span>
 </div> 
 23
+
+* Analyzed potential vulnerabilities, such as information leakage, remote code execution, and pipeline output modification. Developed proof-of-concept attacks and proposed mitigations.
+* Conducted a large-scale analysis of over 300,000 GitHub repositories and 8,000 unique scripts created by more than 5000 developers, providing dataset for future CI/CD related researchs.
