@@ -1,7 +1,7 @@
 # About Me
 
-My name is Xingkai Wang (王行楷). I am interested in system optimization and hardening, especially via exploiting the potential of next-generation hardware or novel microarchitectures.
+My name is Xingkai Wang (王行楷). I am passionate about system optimization and security hardening, particularly through leveraging the capabilities of next-generation hardware and innovative microarchitectures.
 
-I get my bachelor degree at Computer Science in June, 2023. I am currently in Zhejiang University as a master student at Cyber Security.
+I received my bachelor's degree in Computer Science in June 2023. Currently, I am pursuing my master's degree in Cyber Security at Zhejiang University.
 
 Here is my [resume](resume.pdf).
