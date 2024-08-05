@@ -1,6 +1,6 @@
 [submodule "hipaper"]
     path = themes/hipaper
     url = https://github.com/iTimeTraveler/hexo-theme-hipaper.git
-[submodule "themes/blog-theme"]
-	path = themes/blog-theme
+[submodule "themes/next"]
+	path = themes/next
 	url = git@github.com:bittervan/blog-theme.git
