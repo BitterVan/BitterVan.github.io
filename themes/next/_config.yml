@@ -368,7 +368,7 @@ codeblock:
   highlight_theme: night
   # Add copy button on codeblock
   copy_button:
-    enable: false
+    enable: true
     # Show text copy result.
     show_result: false
     # Available values: default | flat | mac
@@ -400,8 +400,8 @@ bookmark:
 
 # `Follow me on GitHub` banner in the top-right corner.
 github_banner:
-  enable: false
-  permalink: https://github.com/yourname
+  enable: true
+  permalink: https://github.com/bittervan
   title: Follow me on GitHub
 
 
@@ -432,25 +432,25 @@ font:
   # Global font settings used for all elements inside <body>.
   global:
     external: true
-    family: 'Noto Serif SC'
+    family: 'Times New Roman'
     size: 
 
   # Font settings for site title (.site-title).
   title:
     external: true
-    family: 'Noto Serif SC'
+    family: 'Times New Roman'
     size: 
 
   # Font settings for headlines (<h1> to <h6>).
   headings:
     external: true
-    family: 'Noto Serif SC'
-    size: 
+    family: 'Times New Roman'
+    size: 3
 
   # Font settings for posts (.post-body).
   posts:
     external: true
-    family: 'Noto Serif SC'
+    family: 'Times New Roman'
 
   # Font settings for <code> and code blocks.
   codes:
