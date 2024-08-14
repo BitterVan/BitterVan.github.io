@@ -1,5 +1,5 @@
 ---
-title: "How Can MicroPython Run Like A OS?"
+title: "How Can MicroPython Run Like An OS?"
 date: 2022-04-16 09:48:10
 tags: Embedded System
 ---
